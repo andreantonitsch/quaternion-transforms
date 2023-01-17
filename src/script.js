@@ -69,10 +69,10 @@ scene.environment = environmentMap
  */
 
 // Textures
-const mapTexture = textureLoader.load('/models/LeePerrySmith/color.jpg')
+const mapTexture = textureLoader.load('models/LeePerrySmith/color.jpg')
 mapTexture.encoding = THREE.sRGBEncoding
 
-const normalTexture = textureLoader.load('/models/LeePerrySmith/normal.jpg')
+const normalTexture = textureLoader.load('models/LeePerrySmith/normal.jpg')
 
 // Materia;
 const customUniforms = {
