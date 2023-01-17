@@ -6,6 +6,7 @@
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
     "deploy": "gh-pages -d dist"
   },
+  "homepage": "https://andreantonitsch.github.io/quaternion-transforms/",
   "dependencies": {
     "@babel/core": "^7.17.10",
     "@babel/preset-env": "^7.17.10",

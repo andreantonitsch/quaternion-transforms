@@ -51,12 +51,12 @@ const updateAllMaterials = () =>
  * Environment map
  */
 const environmentMap = cubeTextureLoader.load([
-    '/textures/environmentMaps/0/px.jpg',
-    '/textures/environmentMaps/0/nx.jpg',
-    '/textures/environmentMaps/0/py.jpg',
-    '/textures/environmentMaps/0/ny.jpg',
-    '/textures/environmentMaps/0/pz.jpg',
-    '/textures/environmentMaps/0/nz.jpg'
+    './textures/environmentMaps/0/px.jpg',
+    './textures/environmentMaps/0/nx.jpg',
+    './textures/environmentMaps/0/py.jpg',
+    './textures/environmentMaps/0/ny.jpg',
+    './textures/environmentMaps/0/pz.jpg',
+    './textures/environmentMaps/0/nz.jpg'
 ])
 environmentMap.encoding = THREE.sRGBEncoding
 
@@ -69,10 +69,10 @@ scene.environment = environmentMap
  */
 
 // Textures
-const mapTexture = textureLoader.load('models/LeePerrySmith/color.jpg')
+const mapTexture = textureLoader.load('./models/LeePerrySmith/color.jpg')
 mapTexture.encoding = THREE.sRGBEncoding
 
-const normalTexture = textureLoader.load('models/LeePerrySmith/normal.jpg')
+const normalTexture = textureLoader.load('./models/LeePerrySmith/normal.jpg')
 
 // Materia;
 const customUniforms = {
@@ -80,9 +80,9 @@ const customUniforms = {
     uTwistAxis : {value : new THREE.Vector3(1.0, 0.0, 0.0)},
     uStretchAxis : {value : new THREE.Vector3(0.0, 1.0, 0.0)},
     uDisplacementAxis: {value : new THREE.Vector3(0.0, 0.0, 1.0)}, 
-    uTwistIntensity : {value : 0.05 },
-    uStretchIntensity : {value : 0.00 },
-    uDisplacementIntensity : {value : 0.00 },
+    uTwistIntensity : {value : 0.5 },
+    uStretchIntensity : {value : 0.1 },
+    uDisplacementIntensity : {value : 0.1 },
     uTimeScale : { value  : 1.0 / 10.0},
     uFrequency : { value : 2.0},
     uTwistMode : {value : 0.0},
@@ -192,7 +192,7 @@ depthMaterial.onBeforeCompile = (shader) => {
 //#region
 let mesh;
 gltfLoader.load(
-    '/models/LeePerrySmith/LeePerrySmith.glb',
+    './models/LeePerrySmith/LeePerrySmith.glb',
     (gltf) =>
     {
         // Model
