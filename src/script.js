@@ -23,12 +23,13 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
+scene.background = new THREE.Color(0xB6C9E3)
+
 /**
  * Loaders
  */
 const textureLoader = new THREE.TextureLoader()
 const gltfLoader = new GLTFLoader()
-const cubeTextureLoader = new THREE.CubeTextureLoader()
 
 /**
  * Update all materials
@@ -39,7 +40,6 @@ const updateAllMaterials = () =>
     {
         if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial)
         {
-            child.material.envMapIntensity = 1
             child.material.needsUpdate = true
             child.castShadow = true
             child.receiveShadow = true
@@ -47,32 +47,12 @@ const updateAllMaterials = () =>
     })
 }
 
-/**
- * Environment map
- */
-const environmentMap = cubeTextureLoader.load([
-    './textures/environmentMaps/0/px.jpg',
-    './textures/environmentMaps/0/nx.jpg',
-    './textures/environmentMaps/0/py.jpg',
-    './textures/environmentMaps/0/ny.jpg',
-    './textures/environmentMaps/0/pz.jpg',
-    './textures/environmentMaps/0/nz.jpg'
-])
-environmentMap.encoding = THREE.sRGBEncoding
-
-scene.background = environmentMap
-scene.environment = environmentMap
 //#endregion
 
 /**
  * Material
  */
 
-// Textures
-const mapTexture = textureLoader.load('./models/LeePerrySmith/color.jpg')
-mapTexture.encoding = THREE.sRGBEncoding
-
-const normalTexture = textureLoader.load('./models/LeePerrySmith/normal.jpg')
 
 // Materia;
 const customUniforms = {
@@ -100,11 +80,6 @@ gui.add(customUniforms.uTimeScale, 'value', 0, 2, 0.0001).name('Time Scale')
 gui.add(customUniforms.uTwistMode, 'value', {"outwards": 0.0, "inwards" : 1.0}).name('Twist Type')
 
 
-
-const material = new THREE.MeshStandardMaterial( {
-    map: mapTexture,
-    normalMap: normalTexture
-})
 const depthMaterial = new THREE.MeshDepthMaterial({
     depthPacking: THREE.RGBADepthPacking
 })
@@ -147,8 +122,9 @@ transformed += - stretch_distance * uStretchIntensity * stretch_axis;
 transformed = conjugation(transformed, rotation);
 `
 
-material.onBeforeCompile = (shader) => {
 
+const set_material_shader = (shader) => {
+    
     shader.vertexShader = shader.vertexShader.replace(
         '#include <common>',
         common_unifrom_snippet
@@ -167,10 +143,10 @@ material.onBeforeCompile = (shader) => {
     )
 
     extend_shader_uniforms(shader)
-
 }
+ 
 
-depthMaterial.onBeforeCompile = (shader) => { 
+const set_depth_shader = (shader) => { 
     shader.vertexShader = shader.vertexShader.replace(
         '#include <common>',
         common_unifrom_snippet
@@ -186,26 +162,29 @@ depthMaterial.onBeforeCompile = (shader) => {
 }
 
 
+
 /**
  * Models
  */
 //#region
 let mesh;
 gltfLoader.load(
-    './models/LeePerrySmith/LeePerrySmith.glb',
+    './models/Suzanne/Suzanne.gltf',
     (gltf) =>
     {
         // Model
         mesh = gltf.scene.children[0]
         mesh.rotation.y = 0.5 * Math.PI
-        mesh.material = material
+        //mesh.material = material
         mesh.customDepthMaterial = depthMaterial
         scene.add(mesh)
-
+        mesh.material.metalness = 0.0
+        mesh.material.onBeforeCompile = set_material_shader
+        mesh.customDepthMaterial.onBeforeCompile = set_depth_shader
         // The World -> Model matrix
         mesh.updateMatrixWorld()
         customUniforms.uInverseModelMatrix.value.copy(mesh.matrix).invert()
-
+        
         // Update materials
         updateAllMaterials()
     }
@@ -217,13 +196,16 @@ gltfLoader.load(
  * Lights
  */
 //#region
-const directionalLight = new THREE.DirectionalLight('#ffffff', 3)
+const directionalLight = new THREE.DirectionalLight('#ffffff', 10)
 directionalLight.castShadow = true
 directionalLight.shadow.mapSize.set(1024, 1024)
 directionalLight.shadow.camera.far = 15
 directionalLight.shadow.normalBias = 0.05
 directionalLight.position.set(0.25, 2, 2.25)
 scene.add(directionalLight)
+
+const ambient_light = new THREE.AmbientLight('#ffffff', 4)
+scene.add(ambient_light)
 //#endregion
 
 /**
@@ -257,7 +239,7 @@ window.addEventListener('resize', () =>
 //#region Camera  Setup and Control Block
 // Base camera
 const camera = new THREE.PerspectiveCamera(27, sizes.width / sizes.height, 0.1, 300)
-camera.position.set(30, 3, 30)
+camera.position.set(6, 3, 6)
 camera.lookAt(0, 0, 0)
 scene.add(camera)
 
@@ -271,7 +253,7 @@ controls.enableDamping = true
  */ 
 //#region Axis Controller functions Block
 let drag_objects = []
-const CONTROLLER_DISTANCE = 10.0
+const CONTROLLER_DISTANCE = 2.0
 
 function set_axis(axis_obj){
     axis_obj.position.normalize().multiplyScalar(CONTROLLER_DISTANCE)
@@ -285,7 +267,7 @@ function set_axis(axis_obj){
 function add_uniform_axis(axis_color, uniform)
 {
     const axis_control = new THREE.Mesh( 
-        new THREE.BoxGeometry( 0.35, 0.35, 0.35 ), 
+        new THREE.BoxGeometry( 0.15, 0.15, 0.15 ), 
         new THREE.MeshNormalMaterial())
     const initial_direction = new THREE.Vector3().copy(uniform.value).multiplyScalar(CONTROLLER_DISTANCE)
     axis_control.position.copy(initial_direction)
@@ -334,7 +316,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFShadowMap
 renderer.physicallyCorrectLights = true
-renderer.outputEncoding = THREE.sRGBEncoding
+//renderer.outputEncoding = THREE.sRGBEncoding
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 1
 renderer.setSize(sizes.width, sizes.height)
